@@ -1,7 +1,6 @@
 package com.interview.dynamic;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Date 08/01/2014
@@ -106,6 +105,99 @@ public class BreakMultipleWordsWithNoSpaceIntoSpace {
         return buffer.toString();
     }
 
+    /**
+     * Prints all the words possible instead of just one combination.
+     * Reference
+     * https://leetcode.com/problems/word-break-ii/
+     */
+    public List<String> wordBreakTopDown(String s, Set<String> wordDict) {
+        Map<Integer, List<String>> dp = new HashMap<>();
+        int max = 0;
+        for (String s1 : wordDict) {
+            max = Math.max(max, s1.length());
+        }
+        return wordBreakUtil(s, wordDict, dp, 0, max);
+    }
+
+    private List<String> wordBreakUtil(String s, Set<String> dict, Map<Integer, List<String>> dp, int start, int max) {
+        if (start == s.length()) {
+            return Collections.singletonList("");
+        }
+
+        if (dp.containsKey(start)) {
+            return dp.get(start);
+        }
+
+        List<String> words = new ArrayList<>();
+        for (int i = start; i < start + max && i < s.length(); i++) {
+            String newWord = s.substring(start, i + 1);
+            if (!dict.contains(newWord)) {
+                continue;
+            }
+            List<String> result = wordBreakUtil(s, dict, dp, i + 1, max);
+            for (String word : result) {
+                String extraSpace = word.length() == 0 ? "" : " ";
+                words.add(newWord + extraSpace + word);
+            }
+        }
+        dp.put(start, words);
+        return words;
+    }
+
+    /**
+     * Check if any one solution exists.
+     * https://leetcode.com/problems/word-break/
+     */
+    public boolean wordBreakTopDownOneSolution(String s, Set<String> wordDict) {
+        Map<Integer, Boolean> dp = new HashMap<>();
+        int max = 0;
+        for (String s1 : wordDict) {
+            max = Math.max(max, s1.length());
+        }
+        return wordBreakTopDownOneSolutionUtil(s, wordDict, 0, max, dp);
+
+    }
+
+    private boolean wordBreakTopDownOneSolutionUtil(String s, Set<String> dict, int start, int max, Map<Integer, Boolean> dp) {
+        if (start == s.length()) {
+            return true;
+        }
+
+        if (dp.containsKey(start)) {
+            return dp.get(start);
+        }
+
+        for (int i = start; i < start + max && i < s.length(); i++) {
+            String newWord = s.substring(start, i + 1);
+            if (!dict.contains(newWord)) {
+                continue;
+            }
+            if (wordBreakTopDownOneSolutionUtil(s, dict, i + 1, max, dp)) {
+                dp.put(start, true);
+                return true;
+            }
+        }
+        dp.put(start, false);
+        return false;
+    }
+
+    public boolean wordBreakBottomUp(String s, List<String> wordList) {
+        boolean[] T = new boolean[s.length() + 1];
+        Set<String> set = new HashSet<>();
+        for (String word : wordList) {
+            set.add(word);
+        }
+        T[0] = true;
+        for (int i = 1; i <= s.length(); i++) {
+            for (int j = 0; j < i; j++) {
+                if(T[j] && set.contains(s.substring(j, i))) {
+                    T[i] = true;
+                    break;
+                }
+            }
+        }
+        return T[s.length()];
+    }
     
     public static void main(String args[]){
         Set<String> dictionary = new HashSet<String>();
